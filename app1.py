@@ -2,78 +2,31 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-# ==============================
-# CONFIG
-# ==============================
-INTRANET_URL = "http://10.207.195.198/dynparm_187.htm"
+INTRANET_URL = "http://10.207.195.198/dynparm_2.htm"
 
 st.set_page_config(page_title="ONGC Live Pressure", layout="centered")
-
 st.title("ONGC – Live Pressure Monitor")
 
-placeholder = st.empty()
-
-# ==============================
-# FUNCTION TO FETCH PRESSURE
-# ==============================
 def fetch_pressure():
     try:
-        r = requests.get(INTRANET_URL, timeout=3)
+        r = requests.get(INTRANET_URL, timeout=5)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        tag = soup.find(class_="gross")
+        tag = soup.find("td", {"id": "drk"})
 
         if tag:
-            value = float(tag.get_text(strip=True).replace(",", ""))
+            value = float(tag.text.strip())
             return value, "LIVE"
-        else:
-            return None, "TAG NOT FOUND"
+
+        return None, "TAG NOT FOUND"
 
     except:
         return None, "INTRANET NOT REACHABLE"
 
-
-# ==============================
-# SESSION STATE FOR LAST VALUE
-# ==============================
-if "last_pressure" not in st.session_state:
-    st.session_state.last_pressure = None
-
-# ==============================
-# FETCH DATA
-# ==============================
 pressure, status = fetch_pressure()
 
-# ==============================
-# DISPLAY LOGIC
-# ==============================
-if pressure is not None:
-    st.session_state.last_pressure = pressure
-    st.success("✅ LIVE DATA FROM DCS")
-
-elif st.session_state.last_pressure is not None:
-    pressure = st.session_state.last_pressure
-    st.warning("⚠️ Showing LAST AVAILABLE VALUE")
-
+if pressure:
+    st.metric("Pressure (kgf/cm²)", f"{pressure}")
+    st.success("LIVE DATA FROM DCS")
 else:
-    pressure = st.number_input("Enter Manual Pressure", value=0.0, step=0.1)
-    st.warning("⚠️ Manual Mode – Intranet not reachable")
-
-# ==============================
-# KPI DISPLAY
-# ==============================
-placeholder.metric("Pressure", f"{pressure}")
-
-
-st.caption(f"Status: {status}")
-
-# ==============================
-# AUTO REFRESH
-# ==============================
-auto = st.checkbox("Enable Auto Refresh", value=True)
-
-if auto:
-    import time
-    time.sleep(5)  # refresh every 5 seconds
-    st.rerun()
-
+    st.error(status)
