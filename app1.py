@@ -2,38 +2,38 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-INTRANET_URL = "http://10.207.195.198/dynparm_2.htm"
+URL = "http://10.207.195.198/dynparm_2.htm"
 
 st.set_page_config(page_title="ONGC Live Pressure", layout="centered")
 st.title("ONGC – Live Pressure Monitor")
 
+st.markdown(
+    "<meta http-equiv='refresh' content='5'>",
+    unsafe_allow_html=True
+)
+
 def fetch_pressure():
     try:
-        headers = {
-            "User-Agent": "Mozilla/5.0",
-            "Accept": "text/html",
-            "Connection": "keep-alive"
-        }
-
-        r = requests.get(INTRANET_URL, headers=headers, timeout=5)
+        r = requests.get(URL, timeout=5)
+        r.raise_for_status()
 
         soup = BeautifulSoup(r.text, "html.parser")
 
-        tag = soup.find("td", {"id": "drk"})
+        tag = soup.find("td", class_="gross")
 
         if tag:
             value = float(tag.text.strip())
-            return value, "LIVE"
-
-        return None, "TAG NOT FOUND"
+            return value, "LIVE FROM DCS"
+        else:
+            return None, "TAG NOT FOUND"
 
     except Exception as e:
-        return None, f"INTRANET ERROR: {e}"
+        return None, f"ERROR: {e}"
+
 pressure, status = fetch_pressure()
 
-if pressure:
-    st.metric("Pressure (kgf/cm²)", f"{pressure}")
-    st.success("LIVE DATA FROM DCS")
+if pressure is not None:
+    st.success(status)
+    st.metric("Pressure (kgf/cm²)", pressure)
 else:
     st.error(status)
-
