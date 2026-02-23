@@ -43,7 +43,7 @@ if "last_pressure" not in st.session_state:
 auto = st.checkbox("Enable Auto Refresh", value=True)
 
 if auto:
-    st.experimental_rerun()
+    st.rerun()
 
 # ==============================
 # FETCH DATA
@@ -69,5 +69,6 @@ else:
 # KPI DISPLAY
 # ==============================
 st.metric("Pressure", f"{pressure}")
+
 
 st.caption(f"Status: {status}")
