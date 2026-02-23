@@ -43,6 +43,8 @@ if "last_pressure" not in st.session_state:
 auto = st.checkbox("Enable Auto Refresh", value=True)
 
 if auto:
+    import time
+    time.sleep(5)  # refresh every 5 seconds
     st.rerun()
 
 # ==============================
@@ -72,3 +74,4 @@ st.metric("Pressure", f"{pressure}")
 
 
 st.caption(f"Status: {status}")
+
