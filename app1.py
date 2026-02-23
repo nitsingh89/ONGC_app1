@@ -11,6 +11,8 @@ st.set_page_config(page_title="ONGC Live Pressure", layout="centered")
 
 st.title("ONGC – Live Pressure Monitor")
 
+placeholder = st.empty()
+
 # ==============================
 # FUNCTION TO FETCH PRESSURE
 # ==============================
@@ -38,16 +40,6 @@ if "last_pressure" not in st.session_state:
     st.session_state.last_pressure = None
 
 # ==============================
-# AUTO REFRESH
-# ==============================
-auto = st.checkbox("Enable Auto Refresh", value=True)
-
-if auto:
-    import time
-    time.sleep(5)  # refresh every 5 seconds
-    st.rerun()
-
-# ==============================
 # FETCH DATA
 # ==============================
 pressure, status = fetch_pressure()
@@ -64,14 +56,24 @@ elif st.session_state.last_pressure is not None:
     st.warning("⚠️ Showing LAST AVAILABLE VALUE")
 
 else:
-    pressure = st.number_input("Enter Manual Pressure", value=0.0)
-    st.warning("⚠️ Manual Mode")
+    pressure = st.number_input("Enter Manual Pressure", value=0.0, step=0.1)
+    st.warning("⚠️ Manual Mode – Intranet not reachable")
 
 # ==============================
 # KPI DISPLAY
 # ==============================
-st.metric("Pressure", f"{pressure}")
+placeholder.metric("Pressure", f"{pressure}")
 
 
 st.caption(f"Status: {status}")
+
+# ==============================
+# AUTO REFRESH
+# ==============================
+auto = st.checkbox("Enable Auto Refresh", value=True)
+
+if auto:
+    import time
+    time.sleep(5)  # refresh every 5 seconds
+    st.rerun()
 
