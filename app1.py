@@ -9,7 +9,14 @@ st.title("ONGC – Live Pressure Monitor")
 
 def fetch_pressure():
     try:
-        r = requests.get(INTRANET_URL, timeout=5)
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "text/html",
+            "Connection": "keep-alive"
+        }
+
+        r = requests.get(INTRANET_URL, headers=headers, timeout=5)
+
         soup = BeautifulSoup(r.text, "html.parser")
 
         tag = soup.find("td", {"id": "drk"})
@@ -20,9 +27,8 @@ def fetch_pressure():
 
         return None, "TAG NOT FOUND"
 
-    except:
-        return None, "INTRANET NOT REACHABLE"
-
+    except Exception as e:
+        return None, f"INTRANET ERROR: {e}"
 pressure, status = fetch_pressure()
 
 if pressure:
@@ -30,3 +36,4 @@ if pressure:
     st.success("LIVE DATA FROM DCS")
 else:
     st.error(status)
+
